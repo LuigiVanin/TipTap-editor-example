@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import { useEditor, EditorContent, BubbleMenu } from "@tiptap/vue-3";
+import Baloon from "../components/Baloon.vue";
 import StarterKit from "@tiptap/starter-kit";
 import { onMounted, onUnmounted, ref } from "vue";
+import useClipBoard from "vue-clipboard3";
 import BubbleMenuExt from "@tiptap/extension-bubble-menu";
 import CopyIcon from "../assets/copy.svg";
 import SaveIcon from "../assets/save.svg";
@@ -16,6 +18,30 @@ const props = defineProps<EditorProps>();
 const content = ref(props.content);
 const editable = ref(false);
 const saved = ref(false);
+
+const editor = useEditor({
+    extensions: [StarterKit, BubbleMenuExt],
+    content: content.value,
+    editable: editable.value,
+    injectCSS: false,
+    onUpdate: (something) => {
+        content.value = something.editor.getText();
+    },
+    onBlur: () => {
+        save();
+    },
+});
+
+const { toClipboard } = useClipBoard();
+
+const copy = async () => {
+    try {
+        await toClipboard(content.value);
+        console.log("copied");
+    } catch (err) {
+        console.log(err);
+    }
+};
 
 const save = () => {
     console.log("hapenning");
@@ -39,19 +65,6 @@ const turnOnEditor = () => {
     editor.value?.commands.focus();
 };
 
-const editor = useEditor({
-    extensions: [StarterKit, BubbleMenuExt],
-    content: content.value,
-    editable: editable.value,
-    injectCSS: false,
-    onUpdate: (something) => {
-        content.value = something.editor.getText();
-    },
-    onBlur: () => {
-        save();
-    },
-});
-
 onMounted(() => {
     content.value = editor.value?.getText() ?? "";
 });
@@ -70,49 +83,52 @@ onUnmounted(() => {
                 </span>
             </span>
         </header>
-        <div
-            :class="['editor-wrapper', editable || saved ? 'focus' : '']"
-            @click="() => turnOnEditor()"
-        >
+        <div :class="['editor-wrapper', editable || saved ? 'focus' : '']">
             <BubbleMenu
                 :editor="editor"
                 :tippy-options="{ duration: 100 }"
                 v-if="editor"
             >
-                <button
-                    @click="editor?.chain().focus().toggleBold().run()"
-                    :class="{ 'is-active': editor.isActive('bold') }"
-                >
-                    bold
-                </button>
-                <button
-                    @click="editor?.chain().focus().toggleItalic().run()"
-                    :class="{ 'is-active': editor.isActive('italic') }"
-                >
-                    italic
-                </button>
-                <button
-                    @click="editor?.chain().focus().toggleStrike().run()"
-                    :class="{ 'is-active': editor.isActive('strike') }"
-                >
-                    strike
-                </button>
-                <button
-                    @click="editor?.chain().focus().undo().run()"
-                    :class="{ 'is-active': editor.isActive('undo') }"
-                >
-                    undo
-                </button>
-                <button
-                    @click="editor?.chain().focus().redo().run()"
-                    :class="{ 'is-active': editor.isActive('redo') }"
-                >
-                    redo
-                </button>
+                <Baloon>
+                    <button
+                        @click="editor?.chain().focus().toggleBold().run()"
+                        :class="{ 'is-active': editor.isActive('bold') }"
+                    >
+                        bold
+                    </button>
+                    <button
+                        @click="editor?.chain().focus().toggleItalic().run()"
+                        :class="{ 'is-active': editor.isActive('italic') }"
+                    >
+                        italic
+                    </button>
+                    <button
+                        @click="editor?.chain().focus().toggleStrike().run()"
+                        :class="{ 'is-active': editor.isActive('strike') }"
+                    >
+                        strike
+                    </button>
+                    <button
+                        @click="editor?.chain().focus().undo().run()"
+                        :class="{ 'is-active': editor.isActive('undo') }"
+                    >
+                        undo
+                    </button>
+                    <button
+                        @click="editor?.chain().focus().redo().run()"
+                        :class="{ 'is-active': editor.isActive('redo') }"
+                    >
+                        redo
+                    </button>
+                </Baloon>
             </BubbleMenu>
-            <editor-content :editor="editor" style="padding-inline: 12px" />
+            <editor-content
+                :editor="editor"
+                style="padding-inline: 12px"
+                @click="() => turnOnEditor()"
+            />
             <footer>
-                <button>
+                <button @click="copy()">
                     <img :src="CopyIcon" alt="" />
                 </button>
                 <button @click="saveAction && save()">
@@ -183,6 +199,7 @@ header {
         gap: 4px;
         height: 29px;
         button {
+            z-index: 20;
             width: 24px;
             height: 25px;
             border: none;
