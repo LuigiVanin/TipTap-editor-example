@@ -24,7 +24,7 @@ const props = withDefaults(defineProps<CardProps>(), {
 <style lang="scss" scoped>
 .card {
     background: white;
-    border-top: 5px solid #41167f;
+    /* border-top: 5px solid #41167f; */
     /* margin-top: 5px; */
     --tw-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1),
         0 2px 4px -2px rgb(0 0 0 / 0.1);

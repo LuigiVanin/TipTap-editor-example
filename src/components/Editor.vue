@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import { useEditor, EditorContent, BubbleMenu } from "@tiptap/vue-3";
-import Baloon from "../components/Baloon.vue";
 import StarterKit from "@tiptap/starter-kit";
 import { onMounted, onUnmounted, ref } from "vue";
 import useClipBoard from "vue-clipboard3";
 import BubbleMenuExt from "@tiptap/extension-bubble-menu";
+import BulletList from "@tiptap/extension-bullet-list";
+import OrderedList from "@tiptap/extension-ordered-list";
 import CopyIcon from "../assets/copy.svg";
 import SaveIcon from "../assets/save.svg";
 
@@ -20,7 +21,7 @@ const editable = ref(false);
 const saved = ref(false);
 
 const editor = useEditor({
-    extensions: [StarterKit, BubbleMenuExt],
+    extensions: [StarterKit, BubbleMenuExt, BulletList, OrderedList],
     content: content.value,
     editable: editable.value,
     injectCSS: false,
@@ -89,38 +90,62 @@ onUnmounted(() => {
                 :tippy-options="{ duration: 100 }"
                 v-if="editor"
             >
-                <Baloon>
+                <!-- <Baloon> -->
+                <div class="baloon">
                     <button
                         @click="editor?.chain().focus().toggleBold().run()"
                         :class="{ 'is-active': editor.isActive('bold') }"
+                        style="font-weight: bold"
                     >
-                        bold
+                        B
                     </button>
                     <button
                         @click="editor?.chain().focus().toggleItalic().run()"
                         :class="{ 'is-active': editor.isActive('italic') }"
+                        style="font-style: italic"
                     >
-                        italic
+                        I
                     </button>
                     <button
                         @click="editor?.chain().focus().toggleStrike().run()"
                         :class="{ 'is-active': editor.isActive('strike') }"
                     >
-                        strike
+                        S
                     </button>
+                    <button
+                        @click="
+                            editor?.chain().focus().toggleBulletList().run()
+                        "
+                        :class="{ 'is-active': editor.isActive('bulletList') }"
+                    >
+                        L
+                    </button>
+                    <button
+                        @click="
+                            editor?.chain().focus().toggleOrderedList().run()
+                        "
+                        :class="{ 'is-active': editor.isActive('orderedList') }"
+                    >
+                        1
+                    </button>
+                    <div class="vertical-divisor" />
                     <button
                         @click="editor?.chain().focus().undo().run()"
                         :class="{ 'is-active': editor.isActive('undo') }"
                     >
-                        undo
+                        U
                     </button>
                     <button
                         @click="editor?.chain().focus().redo().run()"
                         :class="{ 'is-active': editor.isActive('redo') }"
                     >
-                        redo
+                        R
                     </button>
-                </Baloon>
+                    <footer>
+                        <span class="arrow-down" />
+                    </footer>
+                </div>
+                <!-- </Baloon> -->
             </BubbleMenu>
             <editor-content
                 :editor="editor"
@@ -217,10 +242,62 @@ header {
         }
     }
 }
-/* .ProseMirror { */
-/* min-height: 3rem; */
-/* padding-inline: 16px !important; */
-/* } */
+
+.baloon {
+    background: white;
+    padding-inline: 5px;
+    border-radius: 5px;
+    box-shadow: 2px 2px 15px 1px rgba(53, 53, 53, 0.418);
+    border: 1px solid #d3d3d3;
+    position: relative;
+    z-index: 9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    .vertical-divisor {
+        height: 25px;
+        width: 1px;
+        background: #d3d3d3;
+    }
+
+    button {
+        /* background: red; */
+        margin: 0;
+        /* padding-block: 8px; */
+        /* padding-inline: 12px; */
+        height: 35px;
+        width: 30px;
+        border: none;
+        font-size: 16px;
+        background: transparent;
+        cursor: pointer;
+        z-index: 10;
+
+        &:hover {
+            background: #dddddd;
+        }
+    }
+
+    footer {
+        z-index: 9;
+        position: absolute;
+        top: 35px;
+        left: 0;
+        right: 0;
+        display: flex;
+        justify-content: center;
+        /* background: red; */
+        span.arrow-down {
+            width: 0;
+            height: 0;
+            border-left: 8px solid transparent;
+            border-right: 8px solid transparent;
+
+            border-top: 10px solid white;
+        }
+    }
+}
 
 .ProseMirror-focused {
     outline: none;
